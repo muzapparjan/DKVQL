@@ -1,0 +1,6 @@
+option  ::  "ADD" | "GET" | "DELETE"
+key     ::  string
+value   ::  bytes
+node    ::  string
+time    ::  uint64
+stat    ::  option ["PREFIX"] key ["FROM" node] ["VALUE" value] ["TIMEOUT" time]
