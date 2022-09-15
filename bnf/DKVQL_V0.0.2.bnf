@@ -1,0 +1,17 @@
+key     ::  string
+value   ::  bytes
+node    ::  string
+time    ::  uint64
+count   ::  uint32
+
+prefix  ::  "PREFIX"
+from    ::  "FROM" node
+timeout ::  "TIMEOUT" time
+replica ::  "REPLICA" count
+
+add     ::  "ADD" key "VALUE" value [replica] [timeout]
+get     ::  "GET" [prefix] key [from] [timeout]
+update  ::  "UPDATE" [prefix] key "VALUE" value [timeout]
+delete  ::  "DELETE" [prefix] key [from] [timeout]
+
+stat    ::  add | get | update | delete
