@@ -1,0 +1,13 @@
+key     ::  string | number | param
+value   ::  string | number | param
+
+param   ::  "@" name
+prefix  ::  "PREFIX"
+timeout ::  "TIMEOUT" uint64
+
+add     ::  "ADD" key "VALUE" value [timeout]
+get     ::  "GET" [prefix] key [timeout]
+update  ::  "UPDATE" [prefix] key "VALUE" value [timeout]
+delete  ::  "DELETE" [prefix] key [timeout]
+
+stat    ::  add | get | update | delete
