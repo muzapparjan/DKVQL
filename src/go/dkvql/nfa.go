@@ -2,6 +2,8 @@ package dkvql
 
 import (
 	"fmt"
+	"math"
+	"strings"
 )
 
 type nfaState struct {
@@ -10,13 +12,13 @@ type nfaState struct {
 	acceptable bool
 }
 
-type NFA struct {
-	states        map[string]nfaState
-	initialStates map[string]struct{}
-	transitions   map[string]map[rune]string
+type nfa struct {
+	states      map[string]nfaState
+	transitions map[string]map[rune]string
 
 	currentStates map[string]struct{}
 	history       []map[string]struct{}
+	new           bool
 }
 
 func newNFAState(name string, priority float32, acceptable bool) nfaState {
@@ -27,34 +29,34 @@ func newNFAState(name string, priority float32, acceptable bool) nfaState {
 	}
 }
 
-func newNFA() *NFA {
-	return &NFA{
+func newNFA() *nfa {
+	return &nfa{
 		states:        make(map[string]nfaState),
-		initialStates: make(map[string]struct{}),
 		transitions:   make(map[string]map[rune]string),
 		currentStates: make(map[string]struct{}),
 		history:       make([]map[string]struct{}, 0),
+		new:           true,
 	}
 }
 
-func (nfa *NFA) addState(name string, priority float32, acceptable bool) error {
-	if _, exist := nfa.states[name]; !exist {
+func (n *nfa) addState(name string, priority float32, acceptable bool) error {
+	if _, exist := n.states[name]; !exist {
 		state := newNFAState(name, priority, acceptable)
-		nfa.states[name] = state
+		n.states[name] = state
 		return nil
 	}
 	return fmt.Errorf("NFA.AddState: State named %v already exist", name)
 }
 
-func (nfa *NFA) addTransition(input rune, from string, to string) error {
+func (n *nfa) addTransition(input rune, from string, to string) error {
 	var (
 		set   map[rune]string
 		exist bool
 	)
-	if set, exist = nfa.transitions[from]; !exist {
+	if set, exist = n.transitions[from]; !exist {
 		set = make(map[rune]string)
 		set[input] = to
-		nfa.transitions[from] = set
+		n.transitions[from] = set
 		return nil
 	}
 	if _, exist = set[input]; !exist {
@@ -64,61 +66,89 @@ func (nfa *NFA) addTransition(input rune, from string, to string) error {
 	return fmt.Errorf("NFA.AddTransition: Transition {input: %v, from: %v, to: %v} already exist", input, from, to)
 }
 
-func (nfa *NFA) setInitialStates(states ...string) error {
-	initialStates := make(map[string]struct{})
-	for _, state := range states {
-		if _, exist := nfa.states[state]; !exist {
-			return fmt.Errorf("SetInitialStates: State named %v does not exist.", state)
-		}
-		initialStates[state] = struct{}{}
-	}
-	nfa.initialStates = initialStates
+func (n *nfa) reset(initialStates map[string]struct{}) error {
+	n.currentStates = initialStates
+	n.history = make([]map[string]struct{}, 0)
+	n.new = true
 	return nil
 }
 
-func (nfa *NFA) reset() error {
-	nfa.currentStates = make(map[string]struct{})
-	nfa.history = make([]map[string]struct{}, 0)
-	return nil
-}
-
-func (nfa *NFA) input(c rune) error {
-	if len(nfa.currentStates) == 0 {
+func (n *nfa) input(c rune) error {
+	if len(n.currentStates) == 0 {
 		return nil
 	}
 	states := make(map[string]struct{})
-	for state := range nfa.currentStates {
-		if transition, exist := nfa.transitions[state]; exist {
+	for state := range n.currentStates {
+		if transition, exist := n.transitions[state]; exist {
 			if to, exist := transition[c]; exist {
-				if _, exist := nfa.states[to]; !exist {
+				if _, exist := n.states[to]; !exist {
 					return fmt.Errorf("NFA.Input: failed to transition from state %v to unknown state %v", state, to)
 				}
 				states[to] = struct{}{}
 			}
 		}
 	}
-	nfa.history = append(nfa.history, nfa.currentStates)
-	nfa.currentStates = states
+	n.history = append(n.history, n.currentStates)
+	n.currentStates = states
+	n.new = false
 	return nil
 }
 
-func (nfa *NFA) back() error {
-	if len(nfa.history) == 0 {
+func (n *nfa) back() error {
+	if len(n.history) == 0 {
 		return nil
 	}
-	last := len(nfa.history) - 1
-	nfa.currentStates = nfa.history[last]
-	nfa.history = nfa.history[:last]
+	last := len(n.history) - 1
+	n.currentStates = n.history[last]
+	n.history = n.history[:last]
+	if len(n.history) == 0 {
+		n.new = true
+	}
 	return nil
 }
 
-func (nfa *NFA) accept() bool {
-	for state := range nfa.currentStates {
-		if s, exist := nfa.states[state]; exist {
+func (n *nfa) accept() (bool, nfaState) {
+	accepted := false
+	best := nfaState{
+		name:       "NotAccepted",
+		priority:   -math.MaxFloat32,
+		acceptable: false,
+	}
+	for state := range n.currentStates {
+		if s, exist := n.states[state]; exist {
 			if s.acceptable {
-				return true
+				accepted = true
+				if best.priority < s.priority {
+					best = s
+				}
 			}
 		}
 	}
-	return false
+	return accepted, best
+}
+
+func (n *nfa) failed() bool {
+	return len(n.currentStates) == 0
+}
+
+func (n *nfa) string() string {
+	var builder strings.Builder
+	builder.WriteString("\nNFA{")
+
+	builder.WriteString("\n\tStates: [")
+	for _, state := range n.states {
+		builder.WriteString(fmt.Sprintf("\n\t\t{name: \t%v, \t\tpriority: \t%v, \tacceptable: \t%v},", state.name, state.priority, state.acceptable))
+	}
+	builder.WriteString("\n\t],")
+
+	builder.WriteString("\n\tTransitions: [")
+	for from, transition := range n.transitions {
+		for input, to := range transition {
+			builder.WriteString(fmt.Sprintf("\n\t\t{from: \t%v, \t\tinput: \t%v, \tto: \t%v},", from, string(input), to))
+		}
+	}
+	builder.WriteString("\n\t],")
+
+	builder.WriteString("\n}")
+	return builder.String()
 }

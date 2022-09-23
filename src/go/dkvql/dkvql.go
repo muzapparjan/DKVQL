@@ -1,34 +1,27 @@
 package dkvql
 
-const (
-	start string = "__start__"
-)
+var defaultNFA *nfa
 
-var (
-	keywords map[string]float32 = map[string]float32{
-		"add": 10,
+func getNFA() (*nfa, error) {
+	if defaultNFA == nil {
+		n, err := buildNFA()
+		if err != nil {
+			return nil, err
+		}
+		defaultNFA = n
 	}
-)
+	return defaultNFA, nil
+}
 
-func CreateNFA() (*NFA, error) {
-	nfa := newNFA()
-
-	err := nfa.addState(start, 0, false)
-	if err != nil {
-		return nil, err
-	}
-
-	err = nfa.setInitialStates(start)
-	if err != nil {
-		return nil, err
-	}
-
+func buildNFA() (*nfa, error) {
+	n := newNFA()
+	n.addState(nfaStart, -1, false)
 	for keyword, priority := range keywords {
-		err = addKeyword(nfa, start, keyword, priority)
+		err := n.addKeyword(nfaStart, keyword, priority)
 		if err != nil {
 			return nil, err
 		}
 	}
 	//TODO
-	return nfa, nil
+	return n, nil
 }

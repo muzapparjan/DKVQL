@@ -12,12 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	nfa, err := dkvql.CreateNFA()
-	if err != nil {
-		panic(err)
-	}
-
-	tokens, err := dkvql.Lex("", nfa)
+	tokens, err := dkvql.Lex("insert Query UPDATE delete")
 	if err != nil {
 		panic(err)
 	}
