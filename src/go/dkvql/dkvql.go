@@ -25,6 +25,5 @@ func buildNFA() (*nfa, error) {
 	n.addFPNumber(5)
 	n.addString(10)
 	n.addName(3)
-	//TODO
 	return n, nil
 }

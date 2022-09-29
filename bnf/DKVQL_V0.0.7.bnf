@@ -1,0 +1,21 @@
+key             ::=     string | number | name
+value           ::=     string | number | name
+time            ::=     number | name
+
+name            ::=     "@" name
+prefix          ::=     "PREFIX"
+timeout         ::=     "TIMEOUT" uint64
+callback        ::=     "CALLBACK" time
+
+insert          ::=     "INSERT" key "VALUE" value [timeout]
+query           ::=     "QUERY" [prefix] key [timeout]
+update          ::=     "UPDATE" [prefix] key "VALUE" value [timeout]
+delete          ::=     "DELETE" [prefix] key [timeout]
+
+listen_insert   ::=     "LISTEN" "INSERT" [prefix key] callback
+listen_query    ::=     "LISTEN" "QUERY" [prefix] key callback
+listen_update   ::=     "LISTEN" "UPDATE" [prefix] key callback
+listen_delete   ::=     "LISTEN" "DELETE" [prefix] key callback
+listen          ::=     listen_insert | listen_query | listen_update | listen_delete
+
+stat            ::=     insert | query | update | delete | listen

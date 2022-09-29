@@ -127,4 +127,27 @@ var (
 	nfaTerminateStates map[string]struct{} = map[string]struct{}{
 		"string": {},
 	}
+	keyTypes map[string]struct{} = map[string]struct{}{
+		"string":         {},
+		"name":           {},
+		"decimal_number": {},
+		"fp_number":      {},
+		"hex_number":     {},
+		"binary_number":  {},
+	}
+	valueTypes map[string]struct{} = map[string]struct{}{
+		"string":         {},
+		"name":           {},
+		"decimal_number": {},
+		"fp_number":      {},
+		"hex_number":     {},
+		"binary_number":  {},
+	}
+	rules map[rule]struct{} = map[rule]struct{}{
+		&insertRule{}: {},
+		&queryRule{}:  {},
+		&updateRule{}: {},
+		&deleteRule{}: {},
+		&listenRule{}: {},
+	}
 )

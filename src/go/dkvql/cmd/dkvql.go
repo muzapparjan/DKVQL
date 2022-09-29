@@ -12,14 +12,14 @@ func main() {
 		panic(err)
 	}
 
-	tokens, err := dkvql.Lex("123456    \n987.654 Delete UPDATE 0b10011101 0xA34b7901 @hello @_hi @how_are_u_123_hi \"Hello!\" 123 \"Stupid Dunkey~\"")
+	src := "insert \"username\" value \"admin\" timeout 30"
+
+	sentence, err := dkvql.Parse(src)
 	if err != nil {
 		panic(err)
 	}
 
-	for _, token := range tokens {
-		fmt.Print("\n" + token.String())
-	}
+	fmt.Printf("\nSentence: {%v}", sentence)
 }
 
 func parseArgs(args []string) error {

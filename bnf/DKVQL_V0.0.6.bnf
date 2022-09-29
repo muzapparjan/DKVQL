@@ -1,7 +1,7 @@
 key             ::=  string | number | name
 value           ::=  string | number | name
 
-name           ::=  "@" name
+name            ::=  "@" name
 prefix          ::=  "PREFIX"
 timeout         ::=  "TIMEOUT" uint64
 callback        ::=  "CALLBACK" name
