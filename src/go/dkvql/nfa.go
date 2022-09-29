@@ -14,11 +14,10 @@ type nfaState struct {
 
 type nfa struct {
 	states      map[string]nfaState
-	transitions map[string]map[rune]string
+	transitions map[string]map[rune]map[string]struct{}
 
 	currentStates map[string]struct{}
 	history       []map[string]struct{}
-	new           bool
 }
 
 func newNFAState(name string, priority float32, acceptable bool) nfaState {
@@ -32,44 +31,36 @@ func newNFAState(name string, priority float32, acceptable bool) nfaState {
 func newNFA() *nfa {
 	return &nfa{
 		states:        make(map[string]nfaState),
-		transitions:   make(map[string]map[rune]string),
+		transitions:   make(map[string]map[rune]map[string]struct{}),
 		currentStates: make(map[string]struct{}),
 		history:       make([]map[string]struct{}, 0),
-		new:           true,
 	}
 }
 
-func (n *nfa) addState(name string, priority float32, acceptable bool) error {
-	if _, exist := n.states[name]; !exist {
-		state := newNFAState(name, priority, acceptable)
-		n.states[name] = state
-		return nil
-	}
-	return fmt.Errorf("NFA.AddState: State named %v already exist", name)
+func (n *nfa) addState(name string, priority float32, acceptable bool) {
+	n.states[name] = newNFAState(name, priority, acceptable)
 }
 
-func (n *nfa) addTransition(input rune, from string, to string) error {
+func (n *nfa) addTransition(input rune, from string, to string) {
 	var (
-		set   map[rune]string
+		set   map[rune]map[string]struct{}
+		tos   map[string]struct{}
 		exist bool
 	)
 	if set, exist = n.transitions[from]; !exist {
-		set = make(map[rune]string)
-		set[input] = to
+		set = make(map[rune]map[string]struct{})
 		n.transitions[from] = set
-		return nil
 	}
-	if _, exist = set[input]; !exist {
-		set[input] = to
-		return nil
+	if tos, exist = set[input]; !exist {
+		tos = make(map[string]struct{})
+		set[input] = tos
 	}
-	return fmt.Errorf("NFA.AddTransition: Transition {input: %v, from: %v, to: %v} already exist", input, from, to)
+	tos[to] = struct{}{}
 }
 
 func (n *nfa) reset(initialStates map[string]struct{}) error {
 	n.currentStates = initialStates
 	n.history = make([]map[string]struct{}, 0)
-	n.new = true
 	return nil
 }
 
@@ -80,17 +71,18 @@ func (n *nfa) input(c rune) error {
 	states := make(map[string]struct{})
 	for state := range n.currentStates {
 		if transition, exist := n.transitions[state]; exist {
-			if to, exist := transition[c]; exist {
-				if _, exist := n.states[to]; !exist {
-					return fmt.Errorf("NFA.Input: failed to transition from state %v to unknown state %v", state, to)
+			if tos, exist := transition[c]; exist {
+				for to := range tos {
+					if _, exist := n.states[to]; !exist {
+						return fmt.Errorf("NFA.Input: failed to transition from state %v to unknown state %v", state, to)
+					}
+					states[to] = struct{}{}
 				}
-				states[to] = struct{}{}
 			}
 		}
 	}
 	n.history = append(n.history, n.currentStates)
 	n.currentStates = states
-	n.new = false
 	return nil
 }
 
@@ -101,9 +93,6 @@ func (n *nfa) back() error {
 	last := len(n.history) - 1
 	n.currentStates = n.history[last]
 	n.history = n.history[:last]
-	if len(n.history) == 0 {
-		n.new = true
-	}
 	return nil
 }
 

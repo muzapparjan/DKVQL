@@ -1,20 +1,20 @@
-key             ::  string | number | param
-value           ::  string | number | param
+key             ::=  string | number | param
+value           ::=  string | number | param
 
-param           ::  "@" name
-prefix          ::  "PREFIX"
-timeout         ::  "TIMEOUT" uint64
-callback        ::  "CALLBACK" param
+param           ::=  "@" name
+prefix          ::=  "PREFIX"
+timeout         ::=  "TIMEOUT" uint64
+callback        ::=  "CALLBACK" param
 
-add             ::  "ADD" key "VALUE" value [timeout]
-get             ::  "GET" [prefix] key [timeout]
-update          ::  "UPDATE" [prefix] key "VALUE" value [timeout]
-delete          ::  "DELETE" [prefix] key [timeout]
+add             ::=  "ADD" key "VALUE" value [timeout]
+get             ::=  "GET" [prefix] key [timeout]
+update          ::=  "UPDATE" [prefix] key "VALUE" value [timeout]
+delete          ::=  "DELETE" [prefix] key [timeout]
 
-listen_add      ::  "LISTEN" "ADD" [prefix key] callback
-listen_get      ::  "LISTEN" "GET" [prefix] key callback
-listen_update   ::  "LISTEN" "UPDATE" [prefix] key callback
-listen_delete   ::  "LISTEN" "DELETE" [prefix] key callback
-listen          ::  listen_add | listen_get | listen_update | listen_delete
+listen_add      ::=  "LISTEN" "ADD" [prefix key] callback
+listen_get      ::=  "LISTEN" "GET" [prefix] key callback
+listen_update   ::=  "LISTEN" "UPDATE" [prefix] key callback
+listen_delete   ::=  "LISTEN" "DELETE" [prefix] key callback
+listen          ::=  listen_add | listen_get | listen_update | listen_delete
 
-stat            ::  add | get | update | delete | listen
+stat            ::=  add | get | update | delete | listen

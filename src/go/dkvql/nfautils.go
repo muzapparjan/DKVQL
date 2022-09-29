@@ -1,62 +1,34 @@
 package dkvql
 
 import (
-	"errors"
 	"strings"
 )
 
-func (n *nfa) addKeyword(start string, keyword string, priority float32) error {
+func (n *nfa) addKeyword(start string, keyword string, priority float32) {
 	if keyword == "" {
-		return errors.New("AddKeyword: keyword must not be empty")
+		return
 	}
 	lower := []rune(strings.ToLower(keyword))
 	upper := []rune(strings.ToUpper(keyword))
 	if len(lower) == 1 {
-		err := n.addState(keyword, priority, true)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(lower[0], start, keyword)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(upper[0], start, keyword)
-		return err
+		n.addState(keyword, priority, true)
+		n.addTransition(lower[0], start, keyword)
+		n.addTransition(upper[0], start, keyword)
+		return
 	}
 	prefix := "__" + keyword + "__"
 	if len(lower) == 2 {
-		err := n.addState(keyword, priority, true)
-		if err != nil {
-			return err
-		}
+		n.addState(keyword, priority, true)
 		lowerState := prefix + string(lower[0])
 		upperState := prefix + string(upper[0])
-		err = n.addState(lowerState, -1, false)
-		if err != nil {
-			return err
-		}
-		err = n.addState(upperState, -1, false)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(lower[0], start, lowerState)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(upper[0], start, upperState)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(lower[1], lowerState, keyword)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(upper[1], upperState, keyword)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(lower[1], upperState, keyword)
-		return err
+		n.addState(lowerState, -1, false)
+		n.addState(upperState, -1, false)
+		n.addTransition(lower[0], start, lowerState)
+		n.addTransition(upper[0], start, upperState)
+		n.addTransition(lower[1], lowerState, keyword)
+		n.addTransition(upper[1], upperState, keyword)
+		n.addTransition(lower[1], upperState, keyword)
+		return
 	}
 	chainFn := func(input []rune) []string {
 		result := make([]string, 0, len(input)+1)
@@ -70,38 +42,62 @@ func (n *nfa) addKeyword(start string, keyword string, priority float32) error {
 	upperChain := chainFn(upper)
 	length := len(lowerChain)
 	for i := 1; i < length-1; i++ {
-		err := n.addState(lowerChain[i], -1, false)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(lower[i-1], lowerChain[i-1], lowerChain[i])
-		if err != nil {
-			return err
-		}
-		err = n.addState(upperChain[i], -1, false)
-		if err != nil {
-			return err
-		}
-		err = n.addTransition(upper[i-1], upperChain[i-1], upperChain[i])
-		if err != nil {
-			return err
-		}
+		n.addState(lowerChain[i], -1, false)
+		n.addTransition(lower[i-1], lowerChain[i-1], lowerChain[i])
+		n.addState(upperChain[i], -1, false)
+		n.addTransition(upper[i-1], upperChain[i-1], upperChain[i])
 	}
-	err := n.addState(keyword, priority, true)
-	if err != nil {
-		return err
+	n.addState(keyword, priority, true)
+	n.addTransition(lower[len(lower)-1], lowerChain[len(lowerChain)-2], keyword)
+	n.addTransition(upper[len(upper)-1], upperChain[len(upperChain)-2], keyword)
+	n.addTransition(lower[1], upperChain[1], lowerChain[2])
+}
+
+func (n *nfa) addBinaryNumber(priority float32) {
+	n.addState("binary_number", priority, true)
+	n.addState("__bin__1", -1, false)
+	n.addState("__bin__2", -1, false)
+	n.addTransition('0', nfaStart, "__bin__1")
+	n.addTransition('b', "__bin__1", "__bin__2")
+	n.addTransition('B', "__bin__1", "__bin__2")
+	for r := range binaryNumbers {
+		n.addTransition(r, "__bin__2", "binary_number")
+		n.addTransition(r, "binary_number", "binary_number")
 	}
-	err = n.addTransition(lower[len(lower)-1], lowerChain[len(lowerChain)-2], keyword)
-	if err != nil {
-		return err
+}
+
+func (n *nfa) addDecimalNumber(priority float32) {
+	n.addState("decimal_number", priority, true)
+	for r := range decimalNumbers {
+		n.addTransition(r, nfaStart, "decimal_number")
+		n.addTransition(r, "decimal_number", "decimal_number")
 	}
-	err = n.addTransition(upper[len(upper)-1], upperChain[len(upperChain)-2], keyword)
-	if err != nil {
-		return err
+}
+
+func (n *nfa) addHexNumber(priority float32) {
+	n.addState("hex_number", priority, true)
+	n.addState("__hex__1", -1, false)
+	n.addState("__hex__2", -1, false)
+	n.addTransition('0', nfaStart, "__hex__1")
+	n.addTransition('x', "__hex__1", "__hex__2")
+	n.addTransition('X', "__hex__1", "__hex__2")
+	for r := range hexNumbers {
+		n.addTransition(r, "__hex__2", "hex_number")
+		n.addTransition(r, "hex_number", "hex_number")
 	}
-	err = n.addTransition(lower[1], upperChain[1], lowerChain[2])
-	if err != nil {
-		return err
+}
+
+func (n *nfa) addFPNumber(priority float32) {
+	n.addState("fp_number", priority, true)
+	n.addState("__fp__1", -1, false)
+	n.addState("__fp__2", -1, false)
+	for r := range decimalNumbers {
+		n.addTransition(r, nfaStart, "__fp__1")
+		n.addTransition(r, "__fp__1", "__fp__1")
 	}
-	return nil
+	n.addTransition('.', "__fp__1", "__fp__2")
+	for r := range decimalNumbers {
+		n.addTransition(r, "__fp__2", "fp_number")
+		n.addTransition(r, "fp_number", "fp_number")
+	}
 }

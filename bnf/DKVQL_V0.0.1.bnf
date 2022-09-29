@@ -1,6 +1,6 @@
-option  ::  "ADD" | "GET" | "UPDATE" | "DELETE"
-key     ::  string
-value   ::  bytes
-node    ::  string
-time    ::  uint64
-stat    ::  option ["PREFIX"] key ["FROM" node] ["VALUE" value] ["TIMEOUT" time]
+option  ::=  "ADD" | "GET" | "UPDATE" | "DELETE"
+key     ::=  string
+value   ::=  bytes
+node    ::=  string
+time    ::=  uint64
+stat    ::=  option ["PREFIX"] key ["FROM" node] ["VALUE" value] ["TIMEOUT" time]

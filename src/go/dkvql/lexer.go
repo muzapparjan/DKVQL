@@ -1,6 +1,8 @@
 package dkvql
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func Lex(src string) ([]*Token, error) {
 	n, err := getNFA()
@@ -13,7 +15,6 @@ func Lex(src string) ([]*Token, error) {
 
 func lex(src string, n *nfa) ([]*Token, error) {
 	input := []rune(src)
-	fmt.Printf("Input: %v\n", string(input))
 	tokens := make([]*Token, 0)
 	length := len(input)
 	cursor := 0
@@ -24,7 +25,7 @@ func lex(src string, n *nfa) ([]*Token, error) {
 	n.reset(initialStates)
 	for cursor < length {
 		c = input[cursor]
-		if n.new {
+		if len(output) == 0 {
 			for s := range skip {
 				if c == s {
 					cursor++

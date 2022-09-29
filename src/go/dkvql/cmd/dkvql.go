@@ -12,13 +12,13 @@ func main() {
 		panic(err)
 	}
 
-	tokens, err := dkvql.Lex("insert Query UPDATE delete")
+	tokens, err := dkvql.Lex("123456 987.654 Delete UPDATE 0b10011101 0xA34b7901")
 	if err != nil {
 		panic(err)
 	}
 
 	for _, token := range tokens {
-		fmt.Println(token.String())
+		fmt.Print("\n" + token.String())
 	}
 }
 
