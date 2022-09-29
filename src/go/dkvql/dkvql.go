@@ -19,10 +19,12 @@ func buildNFA() (*nfa, error) {
 	for keyword, priority := range keywords {
 		n.addKeyword(nfaStart, keyword, priority)
 	}
-	n.addBinaryNumber(5)
-	n.addHexNumber(5)
+	n.addBinaryNumber(7)
+	n.addHexNumber(7)
+	n.addDecimalNumber(6)
 	n.addFPNumber(5)
-	n.addDecimalNumber(5)
+	n.addString(10)
+	n.addName(3)
 	//TODO
 	return n, nil
 }

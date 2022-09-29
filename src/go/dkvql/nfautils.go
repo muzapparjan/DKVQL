@@ -101,3 +101,34 @@ func (n *nfa) addFPNumber(priority float32) {
 		n.addTransition(r, "fp_number", "fp_number")
 	}
 }
+
+func (n *nfa) addString(priority float32) {
+	n.addState("string", priority, true)
+	n.addState("__string__", -1, false)
+	n.addTransition('"', nfaStart, "__string__")
+	n.addTransition(nfaEpsilon, "__string__", "__string__")
+	n.addTransition('"', "__string__", "string")
+}
+
+func (n *nfa) addName(priority float32) {
+	n.addState("name", priority, true)
+	n.addState("__name__", -1, false)
+	n.addTransition('@', nfaStart, "__name__")
+	prefixRunes := make(map[rune]struct{})
+	for r := range lowerChars {
+		prefixRunes[r] = struct{}{}
+	}
+	for r := range upperChars {
+		prefixRunes[r] = struct{}{}
+	}
+	for r := range nameExtra {
+		prefixRunes[r] = struct{}{}
+	}
+	for r := range prefixRunes {
+		n.addTransition(r, "__name__", "name")
+		n.addTransition(r, "name", "name")
+	}
+	for r := range decimalNumbers {
+		n.addTransition(r, "name", "name")
+	}
+}

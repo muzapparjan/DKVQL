@@ -12,7 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	tokens, err := dkvql.Lex("123456 987.654 Delete UPDATE 0b10011101 0xA34b7901")
+	tokens, err := dkvql.Lex("123456    \n987.654 Delete UPDATE 0b10011101 0xA34b7901 @hello @_hi @how_are_u_123_hi \"Hello!\" 123 \"Stupid Dunkey~\"")
 	if err != nil {
 		panic(err)
 	}

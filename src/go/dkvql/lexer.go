@@ -1,8 +1,6 @@
 package dkvql
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func Lex(src string) ([]*Token, error) {
 	n, err := getNFA()
@@ -22,9 +20,10 @@ func lex(src string, n *nfa) ([]*Token, error) {
 	index := 1
 	var c rune
 	output := make([]rune, 0)
-	n.reset(initialStates)
+	n.reset(nfaInitialStates)
 	for cursor < length {
 		c = input[cursor]
+		skipped := false
 		if len(output) == 0 {
 			for s := range skip {
 				if c == s {
@@ -34,8 +33,12 @@ func lex(src string, n *nfa) ([]*Token, error) {
 						line++
 						index = 0
 					}
-					continue
+					skipped = true
+					break
 				}
+			}
+			if skipped {
+				continue
 			}
 		}
 		err := n.input(c)
@@ -51,7 +54,13 @@ func lex(src string, n *nfa) ([]*Token, error) {
 		}
 		cursor++
 		index++
-		if failed := n.failed(); failed {
+		if failed := n.failed(nfaTerminateStates); failed {
+			if accept, best := n.accept(); accept {
+				tokens = append(tokens, newToken(best.name, string(output)))
+				output = make([]rune, 0)
+				n.reset(nfaInitialStates)
+				continue
+			}
 			for {
 				cursor--
 				index--
@@ -70,7 +79,7 @@ func lex(src string, n *nfa) ([]*Token, error) {
 				if accept, best := n.accept(); accept {
 					tokens = append(tokens, newToken(best.name, string(output)))
 					output = make([]rune, 0)
-					n.reset(initialStates)
+					n.reset(nfaInitialStates)
 					cursor++
 					index++
 					break

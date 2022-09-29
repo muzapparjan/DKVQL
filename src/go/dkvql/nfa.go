@@ -3,7 +3,6 @@ package dkvql
 import (
 	"fmt"
 	"math"
-	"strings"
 )
 
 type nfaState struct {
@@ -79,6 +78,11 @@ func (n *nfa) input(c rune) error {
 					states[to] = struct{}{}
 				}
 			}
+			if tos, exist := transition[nfaEpsilon]; exist {
+				for to := range tos {
+					states[to] = struct{}{}
+				}
+			}
 		}
 	}
 	n.history = append(n.history, n.currentStates)
@@ -116,28 +120,11 @@ func (n *nfa) accept() (bool, nfaState) {
 	return accepted, best
 }
 
-func (n *nfa) failed() bool {
-	return len(n.currentStates) == 0
-}
-
-func (n *nfa) string() string {
-	var builder strings.Builder
-	builder.WriteString("\nNFA{")
-
-	builder.WriteString("\n\tStates: [")
-	for _, state := range n.states {
-		builder.WriteString(fmt.Sprintf("\n\t\t{name: \t%v, \t\tpriority: \t%v, \tacceptable: \t%v},", state.name, state.priority, state.acceptable))
-	}
-	builder.WriteString("\n\t],")
-
-	builder.WriteString("\n\tTransitions: [")
-	for from, transition := range n.transitions {
-		for input, to := range transition {
-			builder.WriteString(fmt.Sprintf("\n\t\t{from: \t%v, \t\tinput: \t%v, \tto: \t%v},", from, string(input), to))
+func (n *nfa) failed(terminateStates map[string]struct{}) bool {
+	if accepted, state := n.accept(); accepted {
+		if _, exist := terminateStates[state.name]; exist {
+			return true
 		}
 	}
-	builder.WriteString("\n\t],")
-
-	builder.WriteString("\n}")
-	return builder.String()
+	return len(n.currentStates) == 0
 }

@@ -1,7 +1,7 @@
-key     ::=  string | number | param
-value   ::=  string | number | param
+key     ::=  string | number | name
+value   ::=  string | number | name
 
-param   ::=  "@" name
+name   ::=  "@" name
 prefix  ::=  "PREFIX"
 timeout ::=  "TIMEOUT" uint64
 
