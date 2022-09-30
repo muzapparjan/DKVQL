@@ -3,15 +3,9 @@ package main
 import (
 	"dkvql"
 	"fmt"
-	"os"
 )
 
 func main() {
-	err := parseArgs(os.Args[1:])
-	if err != nil {
-		panic(err)
-	}
-
 	src := "insert \"username\" value \"admin\" timeout 30"
 
 	sentence, err := dkvql.Parse(src)
@@ -19,12 +13,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("\nSentence: {%v}", sentence)
-}
-
-func parseArgs(args []string) error {
-	/*for _, arg := range args {
-		//TODO
-	}*/
-	return nil
+	if insert, ok := sentence.(dkvql.Insert); ok {
+		fmt.Printf("\nInsert: key={%v} value={%v} timeout={%v}", insert.Key.Value, insert.Value.Value, insert.Timeout.Value)
+	}
 }

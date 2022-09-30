@@ -13,7 +13,7 @@ func (rule *insertRule) MayMatch(tokens []*Token) bool {
 	if len(tokens) == 0 {
 		return false
 	}
-	return tokens[0].name == "insert"
+	return tokens[0].Name == "insert"
 }
 
 func (rule *insertRule) Match(tokens []*Token) (Sentence, error) {
@@ -24,7 +24,7 @@ func (rule *insertRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name != "insert" {
+		if tokens[*cursor].Name != "insert" {
 			return err
 		}
 		*cursor++
@@ -34,7 +34,7 @@ func (rule *insertRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if _, exist := keyTypes[tokens[*cursor].name]; !exist {
+		if _, exist := keyTypes[tokens[*cursor].Name]; !exist {
 			return err
 		}
 		insert.Key = tokens[*cursor]
@@ -45,11 +45,11 @@ func (rule *insertRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens)-1 {
 			return err
 		}
-		if tokens[*cursor].name != "value" {
+		if tokens[*cursor].Name != "value" {
 			return err
 		}
 		*cursor++
-		if _, exist := valueTypes[tokens[*cursor].name]; !exist {
+		if _, exist := valueTypes[tokens[*cursor].Name]; !exist {
 			return err
 		}
 		insert.Value = tokens[*cursor]
@@ -63,11 +63,11 @@ func (rule *insertRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor == len(tokens)-1 {
 			return err
 		}
-		if tokens[*cursor].name != "timeout" {
+		if tokens[*cursor].Name != "timeout" {
 			return err
 		}
 		*cursor++
-		if !isNumber(tokens[*cursor]) && tokens[*cursor].name != "name" {
+		if !isNumber(tokens[*cursor]) && tokens[*cursor].Name != "name" {
 			return err
 		}
 		insert.Timeout = tokens[*cursor]
@@ -78,7 +78,7 @@ func (rule *insertRule) Match(tokens []*Token) (Sentence, error) {
 	if err != nil {
 		return nil, err
 	}
-	return insert, nil
+	return *insert, nil
 }
 
 type queryRule struct{}
@@ -87,7 +87,7 @@ func (rule *queryRule) MayMatch(tokens []*Token) bool {
 	if len(tokens) == 0 {
 		return false
 	}
-	return tokens[0].name == "query"
+	return tokens[0].Name == "query"
 }
 
 func (rule *queryRule) Match(tokens []*Token) (Sentence, error) {
@@ -98,7 +98,7 @@ func (rule *queryRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name != "query" {
+		if tokens[*cursor].Name != "query" {
 			return err
 		}
 		*cursor++
@@ -108,7 +108,7 @@ func (rule *queryRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name == "prefix" {
+		if tokens[*cursor].Name == "prefix" {
 			query.Prefix = tokens[*cursor]
 			*cursor++
 		}
@@ -118,7 +118,7 @@ func (rule *queryRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if _, exist := keyTypes[tokens[*cursor].name]; !exist {
+		if _, exist := keyTypes[tokens[*cursor].Name]; !exist {
 			return err
 		}
 		query.Key = tokens[*cursor]
@@ -132,11 +132,11 @@ func (rule *queryRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor == len(tokens)-1 {
 			return err
 		}
-		if tokens[*cursor].name != "timeout" {
+		if tokens[*cursor].Name != "timeout" {
 			return err
 		}
 		*cursor++
-		if !isNumber(tokens[*cursor]) && tokens[*cursor].name != "name" {
+		if !isNumber(tokens[*cursor]) && tokens[*cursor].Name != "name" {
 			return err
 		}
 		query.Timeout = tokens[*cursor]
@@ -156,7 +156,7 @@ func (rule *updateRule) MayMatch(tokens []*Token) bool {
 	if len(tokens) == 0 {
 		return false
 	}
-	return tokens[0].name == "update"
+	return tokens[0].Name == "update"
 }
 
 func (rule *updateRule) Match(tokens []*Token) (Sentence, error) {
@@ -167,7 +167,7 @@ func (rule *updateRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name != "update" {
+		if tokens[*cursor].Name != "update" {
 			return err
 		}
 		*cursor++
@@ -177,7 +177,7 @@ func (rule *updateRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name == "prefix" {
+		if tokens[*cursor].Name == "prefix" {
 			update.Prefix = tokens[*cursor]
 			*cursor++
 		}
@@ -187,7 +187,7 @@ func (rule *updateRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if _, exist := keyTypes[tokens[*cursor].name]; !exist {
+		if _, exist := keyTypes[tokens[*cursor].Name]; !exist {
 			return err
 		}
 		update.Key = tokens[*cursor]
@@ -198,11 +198,11 @@ func (rule *updateRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens)-1 {
 			return err
 		}
-		if tokens[*cursor].name != "value" {
+		if tokens[*cursor].Name != "value" {
 			return err
 		}
 		*cursor++
-		if _, exist := valueTypes[tokens[*cursor].name]; !exist {
+		if _, exist := valueTypes[tokens[*cursor].Name]; !exist {
 			return err
 		}
 		update.Value = tokens[*cursor]
@@ -216,11 +216,11 @@ func (rule *updateRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor == len(tokens)-1 {
 			return err
 		}
-		if tokens[*cursor].name != "timeout" {
+		if tokens[*cursor].Name != "timeout" {
 			return err
 		}
 		*cursor++
-		if !isNumber(tokens[*cursor]) && tokens[*cursor].name != "name" {
+		if !isNumber(tokens[*cursor]) && tokens[*cursor].Name != "name" {
 			return err
 		}
 		update.Timeout = tokens[*cursor]
@@ -240,7 +240,7 @@ func (rule *deleteRule) MayMatch(tokens []*Token) bool {
 	if len(tokens) == 0 {
 		return false
 	}
-	return tokens[0].name == "delete"
+	return tokens[0].Name == "delete"
 }
 
 func (rule *deleteRule) Match(tokens []*Token) (Sentence, error) {
@@ -251,7 +251,7 @@ func (rule *deleteRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name != "delete" {
+		if tokens[*cursor].Name != "delete" {
 			return err
 		}
 		*cursor++
@@ -261,7 +261,7 @@ func (rule *deleteRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if tokens[*cursor].name == "prefix" {
+		if tokens[*cursor].Name == "prefix" {
 			delete.Prefix = tokens[*cursor]
 			*cursor++
 		}
@@ -271,7 +271,7 @@ func (rule *deleteRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor >= len(tokens) {
 			return err
 		}
-		if _, exist := keyTypes[tokens[*cursor].name]; !exist {
+		if _, exist := keyTypes[tokens[*cursor].Name]; !exist {
 			return err
 		}
 		delete.Key = tokens[*cursor]
@@ -285,11 +285,11 @@ func (rule *deleteRule) Match(tokens []*Token) (Sentence, error) {
 		if *cursor == len(tokens)-1 {
 			return err
 		}
-		if tokens[*cursor].name != "timeout" {
+		if tokens[*cursor].Name != "timeout" {
 			return err
 		}
 		*cursor++
-		if !isNumber(tokens[*cursor]) && tokens[*cursor].name != "name" {
+		if !isNumber(tokens[*cursor]) && tokens[*cursor].Name != "name" {
 			return err
 		}
 		delete.Timeout = tokens[*cursor]
@@ -309,7 +309,7 @@ func (rule *listenRule) MayMatch(tokens []*Token) bool {
 	if len(tokens) == 0 {
 		return false
 	}
-	return tokens[0].name == "listen"
+	return tokens[0].Name == "listen"
 }
 
 func (rule *listenRule) Match(tokens []*Token) (Sentence, error) {
@@ -318,7 +318,7 @@ func (rule *listenRule) Match(tokens []*Token) (Sentence, error) {
 }
 
 func isNumber(token *Token) bool {
-	switch token.name {
+	switch token.Name {
 	case "binary_number":
 		return true
 	case "decimal_number":

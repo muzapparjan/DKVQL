@@ -2,7 +2,7 @@ key             ::=     string | number | name
 value           ::=     string | number | name
 time            ::=     number | name
 
-name            ::=     "@" name
+name            ::=     "@" label
 prefix          ::=     "PREFIX"
 timeout         ::=     "TIMEOUT" uint64
 callback        ::=     "CALLBACK" time
